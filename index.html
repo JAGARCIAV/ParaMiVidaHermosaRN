@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carta Pro Animada</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg1: #070814;
+      --bg2: #130d22;
+      --glow1: rgba(255, 77, 151, 0.28);
+      --glow2: rgba(122, 92, 255, 0.22);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.82);
+      --glass: rgba(255,255,255,0.08);
+      --glass-strong: rgba(255,255,255,0.12);
+      --line: rgba(255,255,255,0.16);
+      --pink: #ff4da6;
+      --pink2: #ff84c4;
+      --violet: #8b5cf6;
+      --paper: #f6eadf;
+      --paper-text: #2d1c1d;
+      --envelope: #f5aeb8;
+      --envelope-edge: #d55561;
+      --heart: #d93f48;
+      --shadow: 0 30px 70px rgba(0,0,0,.45);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 10% 12%, var(--glow1), transparent 20%),
+        radial-gradient(circle at 88% 10%, var(--glow2), transparent 24%),
+        radial-gradient(circle at 52% 100%, rgba(255,120,170,.11), transparent 28%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+
+    .page {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .ambient,
+    .ambient-hearts,
+    .focus-hearts {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .ambient-dot,
+    .ambient-heart,
+    .focus-heart {
+      position: absolute;
+      bottom: -40px;
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+
+    .ambient-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.6);
+    }
+
+    .ambient-heart,
+    .focus-heart {
+      color: rgba(255, 84, 145, .45);
+      text-shadow: 0 0 18px rgba(255, 84, 145, .24);
+    }
+
+    .focus-hearts {
+      opacity: 0;
+      transition: opacity .6s ease;
+      z-index: 21;
+    }
+
+    body.letter-mode .focus-hearts {
+      opacity: 1;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) translateX(0) scale(.85) rotate(0deg); opacity: 0; }
+      10% { opacity: .85; }
+      100% { transform: translateY(-120vh) translateX(30px) scale(1.35) rotate(18deg); opacity: 0; }
+    }
+
+    .hero {
+      position: relative;
+      z-index: 2;
+      width: min(1360px, calc(100% - 48px));
+      min-height: calc(100vh - 24px);
+      margin: 12px auto;
+      border-radius: 34px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
+      backdrop-filter: blur(12px);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), var(--shadow);
+      padding: 36px;
+      display: grid;
+      grid-template-columns: 1.02fr .98fr;
+      gap: 30px;
+      overflow: hidden;
+      transition: opacity .7s ease, transform .7s ease, filter .7s ease;
+    }
+
+    body.letter-mode .hero {
+      opacity: 0;
+      transform: scale(1.06);
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(255,95,160,.08), transparent 24%),
+        radial-gradient(circle at 70% 80%, rgba(139,92,246,.09), transparent 24%);
+      pointer-events: none;
+    }
+
+    .left {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+      padding: 18px 6px;
+    }
+
+    .tag {
+      width: fit-content;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      color: #ff9ccf;
+      font-weight: 800;
+      font-size: 1rem;
+      box-shadow: inset 0 0 20px rgba(255,255,255,.04);
+    }
+
+    .title {
+      font-size: clamp(3.8rem, 7.5vw, 7rem);
+      line-height: .92;
+      letter-spacing: -2.5px;
+      font-weight: 900;
+      max-width: 680px;
+    }
+
+    .title .line {
+      display: block;
+      overflow: hidden;
+    }
+
+    .title .word {
+      display: inline-block;
+      transform: translateY(120%);
+      animation: riseWord .9s forwards;
+    }
+
+    .title .line:nth-child(1) .word:nth-child(1) { animation-delay: .08s; }
+    .title .line:nth-child(1) .word:nth-child(2) { animation-delay: .22s; }
+    .title .line:nth-child(2) .word:nth-child(1) { animation-delay: .36s; }
+    .title .line:nth-child(3) .word:nth-child(1) { animation-delay: .5s; }
+
+    @keyframes riseWord {
+      to { transform: translateY(0); }
+    }
+
+    .gradient {
+      background: linear-gradient(90deg, #fff, var(--pink2), #ffd6e8, #d7c0ff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 5s linear infinite;
+    }
+
+    @keyframes shine { to { background-position: 200% center; } }
+
+    .desc {
+      max-width: 650px;
+      font-size: clamp(1.15rem, 1.9vw, 1.5rem);
+      line-height: 1.62;
+      color: rgba(255,255,255,.74);
+      animation: fadeUp .9s ease .65s both;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      animation: fadeUp .9s ease .9s both;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 18px 28px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .25s ease, box-shadow .25s ease, background .25s ease, opacity .25s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--pink), var(--violet));
+      box-shadow: 0 16px 36px rgba(255,77,166,.26);
+    }
+
+    .btn-secondary {
+      color: #fff;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    .note {
+      max-width: 600px;
+      padding: 26px 24px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.75);
+      font-size: 1rem;
+      line-height: 1.65;
+      animation: fadeUp .9s ease 1.1s both;
+    }
+
+    .note strong {
+      display: block;
+      color: #ff88c4;
+      font-size: 1.08rem;
+      margin-top: 14px;
+    }
+
+    .bars {
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      height: 36px;
+      animation: fadeUp .9s ease 1.25s both;
+    }
+
+    .bars span {
+      width: 8px;
+      border-radius: 999px;
+      background: linear-gradient(to top, var(--pink), #fff);
+      animation: beat 1s ease-in-out infinite;
+    }
+
+    .bars span:nth-child(1) { height: 12px; animation-delay: .1s; }
+    .bars span:nth-child(2) { height: 28px; animation-delay: .25s; }
+    .bars span:nth-child(3) { height: 18px; animation-delay: .4s; }
+    .bars span:nth-child(4) { height: 32px; animation-delay: .15s; }
+    .bars span:nth-child(5) { height: 14px; animation-delay: .33s; }
+
+    @keyframes beat {
+      0%,100% { transform: scaleY(.65); opacity: .78; }
+      50% { transform: scaleY(1.1); opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .right {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: 282px 224px 224px;
+      gap: 18px;
+      perspective: 1200px;
+    }
+
+    .photo {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 16px 30px rgba(0,0,0,.2);
+      animation: fadeUp .85s ease both;
+    }
+
+    .photo:nth-child(1) { grid-column: 1 / 3; animation-delay: .35s; }
+    .photo:nth-child(2) { animation-delay: .55s; }
+    .photo:nth-child(3) { animation-delay: .7s; }
+    .photo:nth-child(4) { grid-column: 1 / 3; animation-delay: .85s; }
+
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .7s ease;
+    }
+
+    .photo:hover img { transform: scale(1.06); }
+
+    .photo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.42), transparent 55%);
+    }
+
+    .label {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      z-index: 2;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.26);
+      border: 1px solid rgba(255,255,255,.16);
+      font-size: 1rem;
+      font-weight: 800;
+      backdrop-filter: blur(8px);
+    }
+
+    .letter-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .45s ease;
+    }
+
+    body.letter-mode .letter-layer {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .focus-dim {
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 6, 16, .74);
+      backdrop-filter: blur(14px);
+    }
+
+    .letter-stage {
+      position: relative;
+      width: min(420px, 92vw);
+      height: min(600px, 88vh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transform: scale(.85);
+      opacity: 0;
+      transition: transform .7s cubic-bezier(.2,.8,.2,1), opacity .7s ease;
+    }
+
+    body.letter-mode .letter-stage {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .envelope-wrap {
+      position: relative;
+      width: 320px;
+      height: 235px;
+      transition: transform .9s ease;
+      transform-style: preserve-3d;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.26));
+    }
+
+    body.envelope-open .envelope-wrap {
+      transform: translateY(34px) scale(1.02);
+    }
+
+    .envelope-back {
+      position: absolute;
+      inset: 0;
+      background: var(--envelope);
+      border: 2px solid var(--envelope-edge);
+      box-shadow: 0 12px 26px rgba(0,0,0,.18);
+    }
+
+    .envelope-back::before,
+    .envelope-back::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 100%;
+      background: var(--envelope-edge);
+      transform-origin: center;
+    }
+
+    .envelope-back::before { transform: translateX(-50%) rotate(53deg); }
+    .envelope-back::after { transform: translateX(-50%) rotate(-53deg); }
+
+    .flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 160px solid transparent;
+      border-right: 160px solid transparent;
+      border-top: 118px solid #f1adb5;
+      transform-origin: top center;
+      transition: transform 1s cubic-bezier(.2,.7,.1,1);
+      z-index: 7;
+    }
+
+    body.envelope-open .flap {
+      transform: rotateX(180deg);
+      z-index: 1;
+    }
+
+    .seal {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 46px;
+      height: 46px;
+      z-index: 8;
+    }
+
+    .seal::before,
+    .seal::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 36px;
+      background: var(--heart);
+      border-radius: 24px 24px 0 0;
+      top: 7px;
+    }
+
+    .seal::before {
+      left: 10px;
+      transform: rotate(-45deg);
+      transform-origin: bottom left;
+    }
+
+    .seal::after {
+      right: 10px;
+      transform: rotate(45deg);
+      transform-origin: bottom right;
+    }
+
+    .front { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+
+    .front-left,
+    .front-right,
+    .front-bottom { position: absolute; }
+
+    .front-left {
+      left: 0; top: 0; width: 0; height: 0;
+      border-left: 160px solid var(--envelope);
+      border-top: 118px solid transparent;
+      border-bottom: 117px solid transparent;
+      filter: brightness(.97);
+    }
+
+    .front-right {
+      right: 0; top: 0; width: 0; height: 0;
+      border-right: 160px solid var(--envelope);
+      border-top: 118px solid transparent;
+      border-bottom: 117px solid transparent;
+      filter: brightness(.95);
+    }
+
+    .front-bottom {
+      left: 0; bottom: 0; width: 0; height: 0;
+      border-left: 160px solid transparent;
+      border-right: 160px solid transparent;
+      border-bottom: 118px solid #f5b8be;
+    }
+
+    .front-line-left,
+    .front-line-right {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      width: 2px;
+      height: 190px;
+      background: var(--envelope-edge);
+      transform-origin: top center;
+      z-index: 7;
+    }
+
+    .front-line-left { transform: translateX(-50%) rotate(52deg); }
+    .front-line-right { transform: translateX(-50%) rotate(-52deg); }
+
+    .paper {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%) translateY(0) rotate(0deg);
+      width: 270px;
+      height: 178px;
+      background: var(--paper);
+      border-radius: 3px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+      overflow: hidden;
+      transition: transform 1.65s cubic-bezier(.2,.7,.1,1), width .9s ease, height .9s ease, box-shadow .6s ease;
+      z-index: 3;
+    }
+
+    body.envelope-open .paper {
+      transform: translateX(-50%) translateY(-138px) rotate(-4deg);
+      width: 282px;
+      height: 190px;
+      z-index: 4;
+    }
+
+    body.reading .paper {
+      transform: translateX(-50%) translateY(-34px) rotate(-4deg) scale(1.18);
+      width: min(90vw, 390px);
+      height: min(76vh, 540px);
+      box-shadow: 0 26px 55px rgba(0,0,0,.28);
+      z-index: 30;
+    }
+
+    .paper-lines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 28px,
+        rgba(96,68,68,.07) 29px
+      );
+      opacity: .24;
+      pointer-events: none;
+    }
+
+    .paper-cover,
+    .paper-content {
+      position: absolute;
+      inset: 0;
+      padding: 24px 22px;
+      transition: opacity .45s ease, transform .45s ease;
+    }
+
+    .paper-cover {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Comic Sans MS", "Trebuchet MS", cursive;
+      color: #201414;
+      font-size: 1rem;
+      z-index: 2;
+    }
+
+    .paper-content {
+      opacity: 0;
+      transform: scale(.98);
+      overflow: auto;
+      font-family: "Comic Sans MS", "Trebuchet MS", cursive;
+      color: var(--paper-text);
+      font-size: .83rem;
+      line-height: 1.48;
+      z-index: 1;
+    }
+
+    body.reading .paper-cover {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.reading .paper-content {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .paper-content h3 {
+      font-size: .86rem;
+      margin-bottom: 10px;
+    }
+
+    .sep {
+      height: 1px;
+      background: rgba(84,56,56,.32);
+      margin: 10px 0;
+    }
+
+    .letter-actions {
+      position: absolute;
+      left: 50%;
+      bottom: -110px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 31;
+    }
+
+    .letter-btn {
+      border: 0;
+      cursor: pointer;
+      border-radius: 16px;
+      padding: 13px 20px;
+      font-size: .96rem;
+      font-weight: 800;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+      transition: transform .25s ease, opacity .25s ease, background .25s ease;
+    }
+
+    .letter-btn:hover { transform: translateY(-2px); }
+
+    .open-btn {
+      background: linear-gradient(135deg, var(--pink), var(--violet));
+      color: #fff;
+    }
+
+    .read-btn {
+      background: #fff4f2;
+      color: #7b3036;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.envelope-open .read-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: -56px;
+      right: -8px;
+      border: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 12px 22px rgba(0,0,0,.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease, transform .3s ease;
+    }
+
+    body.letter-mode .close-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .close-btn:hover { transform: scale(1.06); }
+
+    @media (max-width: 1100px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .right {
+        grid-template-rows: 240px 200px 200px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .hero {
+        width: calc(100% - 24px);
+        padding: 22px;
+        border-radius: 26px;
+      }
+      .title {
+        font-size: clamp(3rem, 12vw, 4.6rem);
+      }
+      .desc {
+        font-size: 1.05rem;
+      }
+      .right {
+        grid-template-columns: 1fr;
+        grid-template-rows: 220px 190px 190px 220px;
+      }
+      .photo:nth-child(1), .photo:nth-child(4) { grid-column: auto; }
+      .buttons { flex-direction: column; }
+      .btn { width: 100%; }
+      .letter-stage { height: min(680px, 88vh); }
+      .letter-actions {
+        bottom: -126px;
+        flex-direction: column;
+        width: min(260px, 70vw);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="ambient" id="ambient"></div>
+    <div class="ambient-hearts" id="ambientHearts"></div>
+    <div class="focus-hearts" id="focusHearts"></div>
+
+    <section class="hero">
+      <div class="left">
+        <div class="tag">✨ Carta visual animada</div>
+
+        <h1 class="title">
+          <span class="line"><span class="word">Eres</span> <span class="word gradient">mi</span></span>
+          <span class="line"><span class="word gradient">inspiración</span></span>
+          <span class="line"><span class="word">favorita</span></span>
+        </h1>
+
+        <p class="desc">
+          Un diseño tipo carta con estilo romántico, moderno y visual. Las fotos que ves son temporales para que luego tú las cambies por las que quieras. Tiene movimiento en letras, fondo con partículas, corazones flotando y efecto 3D al mover el mouse.
+        </p>
+
+        <div class="buttons">
+          <button class="btn btn-primary" id="showLetterBtn">Abrir carta</button>
+          <button class="btn btn-secondary" id="changePhraseBtn">Cambiar frase</button>
+        </div>
+
+        <div class="note" id="noteText">
+          Cada foto, cada momento y cada detalle puede convertirse en algo especial cuando se presenta con cariño. Este diseño está pensado para que se vea elegante, llamativo y con un toque emocional.
+          <strong>Con estilo para ti ✍️</strong>
+        </div>
+
+        <div class="bars" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="right" id="photoGrid">
+        <div class="photo">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80" alt="Foto principal">
+          <div class="label">Foto principal</div>
+        </div>
+        <div class="photo">
+          <img src="https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=1000&q=80" alt="Momento 01">
+          <div class="label">Momento 01</div>
+        </div>
+        <div class="photo">
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1000&q=80" alt="Momento 02">
+          <div class="label">Momento 02</div>
+        </div>
+        <div class="photo">
+          <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80" alt="Recuerdo especial">
+          <div class="label">Recuerdo especial</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="letter-layer" id="letterLayer">
+      <div class="focus-dim" id="focusDim"></div>
+
+      <div class="letter-stage">
+        <button class="close-btn" id="closeLetterBtn">✕</button>
+
+        <div class="envelope-wrap">
+          <div class="seal"></div>
+          <div class="flap"></div>
+          <div class="envelope-back"></div>
+
+          <div class="paper">
+            <div class="paper-lines"></div>
+            <div class="paper-cover">To my love</div>
+            <div class="paper-content">
+              <h3>Dear Bryan,</h3>
+              <p>
+                Loving you has brought so much light into my life. It is in the way you smile,
+                the way you laugh, the way you look at me like I matter deeply, and even in the
+                quiet moments that still make everything feel meaningful and warm.
+              </p>
+              <div class="sep"></div>
+              <p>
+                I think about all the memories we have made, and I already treasure those little
+                things. I can imagine that what matters most is not only the big moments, but also
+                the simple ones: the talks, the glances, the laughs, and the everyday calm.
+              </p>
+              <div class="sep"></div>
+              <p>
+                Even when life is not perfect, your presence feels special. You have a way of making
+                everything feel softer, safer, and more beautiful. That is something I never want to
+                take for granted.
+              </p>
+              <div class="sep"></div>
+              <p>
+                So here is my promise: to keep choosing you, to keep caring, and to keep valuing what
+                we share. Thank you for being someone who makes my heart feel at home.
+              </p>
+              <p style="margin-top: 12px;">Love,<br>Hazel</p>
+            </div>
+          </div>
+
+          <div class="front">
+            <div class="front-left"></div>
+            <div class="front-right"></div>
+            <div class="front-bottom"></div>
+            <div class="front-line-left"></div>
+            <div class="front-line-right"></div>
+          </div>
+
+          <div class="letter-actions">
+            <button class="letter-btn open-btn" id="openEnvelopeBtn">Abrir sobre</button>
+            <button class="letter-btn read-btn" id="readLetterBtn">Leer carta</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const body = document.body;
+    const ambient = document.getElementById('ambient');
+    const ambientHearts = document.getElementById('ambientHearts');
+    const focusHearts = document.getElementById('focusHearts');
+    const showLetterBtn = document.getElementById('showLetterBtn');
+    const openEnvelopeBtn = document.getElementById('openEnvelopeBtn');
+    const readLetterBtn = document.getElementById('readLetterBtn');
+    const closeLetterBtn = document.getElementById('closeLetterBtn');
+    const focusDim = document.getElementById('focusDim');
+    const noteText = document.getElementById('noteText');
+    const photoGrid = document.getElementById('photoGrid');
+    const phrases = [
+      'Cada foto, cada momento y cada detalle puede convertirse en algo especial cuando se presenta con cariño. Este diseño está pensado para que se vea elegante, llamativo y con un toque emocional.',
+      'Puedes cambiar después las fotos y el texto, pero la idea ya queda con una vibra romántica, moderna y visual para sorprender.',
+      'El diseño mezcla galería, carta, fondo brillante y animaciones para que todo se sienta más vivo y mucho más especial.',
+      'La parte más fuerte está al abrir la carta: todo desaparece, solo resalta el sobre y salen corazones detrás como fondo.'
+    ];
+    let phraseIndex = 0;
+
+    function spawnFloating(container, count, className, generator) {
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = className;
+        generator(el, i);
+        container.appendChild(el);
+      }
+    }
+
+    spawnFloating(ambient, 28, 'ambient-dot', (el) => {
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.animationDuration = (8 + Math.random() * 10) + 's';
+      el.style.animationDelay = Math.random() * 9 + 's';
+      el.style.transform = `scale(${0.7 + Math.random() * 1.2})`;
+    });
+
+    spawnFloating(ambientHearts, 14, 'ambient-heart', (el) => {
+      el.textContent = '❤';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.fontSize = (16 + Math.random() * 18) + 'px';
+      el.style.animationDuration = (8 + Math.random() * 8) + 's';
+      el.style.animationDelay = Math.random() * 8 + 's';
+    });
+
+    spawnFloating(focusHearts, 22, 'focus-heart', (el) => {
+      el.textContent = '❤';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.fontSize = (18 + Math.random() * 26) + 'px';
+      el.style.animationDuration = (6 + Math.random() * 6) + 's';
+      el.style.animationDelay = Math.random() * 5 + 's';
+      el.style.opacity = 0.25 + Math.random() * 0.35;
+    });
+
+    showLetterBtn.addEventListener('click', () => {
+      body.classList.add('letter-mode');
+      body.classList.remove('envelope-open', 'reading');
+    });
+
+    openEnvelopeBtn.addEventListener('click', () => {
+      body.classList.add('envelope-open');
+    });
+
+    readLetterBtn.addEventListener('click', () => {
+      if (body.classList.contains('envelope-open')) {
+        body.classList.add('reading');
+      }
+    });
+
+    closeLetterBtn.addEventListener('click', closeLetter);
+    focusDim.addEventListener('click', closeLetter);
+
+    function closeLetter() {
+      body.classList.remove('letter-mode', 'envelope-open', 'reading');
+    }
+
+    document.getElementById('changePhraseBtn').addEventListener('click', () => {
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      noteText.style.opacity = '0';
+      noteText.style.transform = 'translateY(14px)';
+      setTimeout(() => {
+        noteText.innerHTML = `${phrases[phraseIndex]}<strong>Con estilo para ti ✍️</strong>`;
+        noteText.style.opacity = '1';
+        noteText.style.transform = 'translateY(0)';
+      }, 180);
+    });
+
+    photoGrid.addEventListener('mousemove', (e) => {
+      const rect = photoGrid.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      photoGrid.style.transform = `rotateY(${x * 4}deg) rotateX(${y * -4}deg)`;
+    });
+
+    photoGrid.addEventListener('mouseleave', () => {
+      photoGrid.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLetter();
+    });
+  </script>
+</body>
+</html>
